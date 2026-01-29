@@ -1,6 +1,8 @@
 from typing import Optional, Dict
 
 from app.domain.models.models import DistribucionApellidoDepartamento, Apellido, Frases
+from app.domain.services.obtener_apellido_IA import ObtenerApellidoIA
+
 
 def obtener_informacion_apellido(apellido_normalizado: str, apellido_original: str) -> Dict:
     apellido_obj = Apellido.objects.filter(apellido=apellido_normalizado).first()
@@ -17,19 +19,7 @@ def obtener_informacion_apellido(apellido_normalizado: str, apellido_original: s
             "departamentos": distribuciones,
             "frases": frases
         }
-    
-    return {
-        "estado": "no_encontrado",
-        "origen": "IA",
-        "apellido_original": apellido_original,
-        "apellido_normalizado": apellido_normalizado,
-        "departamentos": [
-            {"departamento": "Caldas", "porcentaje": 40.0, "ranking": 1, "origen": "IA"},
-            {"departamento": "Cundinamarca", "porcentaje": 36.0, "ranking": 2, "origen": "IA"},
-            {"departamento": "Magdalena", "porcentaje": 24.0, "ranking": 3, "origen": "IA"},
-        ],
-        "frases": [
-            {"categoria": "PERSONALIDAD", "frase": "Cada historia comienza con un nombre.", "origen": "IA"},
-            {"categoria": "SABOR", "frase": "Descubre tu sabor único.", "origen": "IA"}
-        ]
-    }
+    else:
+        servicio = ObtenerApellidoIA(apellido_normalizado, apellido_original)
+
+        return servicio.ejecutar()
