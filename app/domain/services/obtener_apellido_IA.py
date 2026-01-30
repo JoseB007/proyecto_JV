@@ -10,6 +10,7 @@ from app.domain.models.models import (
 
 from app.integrations.ai_cliente import obtener_apellido_ai
 from app.schemas.ai_response_schema import AI_RESPONSE_SCHEMA
+from app.domain.services.apellido_no_encontrado import apellido_no_encontrado
 
 
 class ObtenerApellidoIA:
@@ -22,6 +23,7 @@ class ObtenerApellidoIA:
         
         if ai_response:
             self._validar_ai_response(ai_response)
+            # print(ai_response)
             apellido_obj = self._crear_apellido(ai_response)
 
             distribuciones = DistribucionApellidoDepartamento.objects.filter(apellido=apellido_obj)
@@ -35,23 +37,8 @@ class ObtenerApellidoIA:
                 "departamentos": distribuciones,
                 "frases": frases
             }
-
         else:
-            return {
-                "estado": "no_encontrado",
-                "origen": "IA",
-                "apellido_original": self.apellido_original,
-                "apellido_normalizado": self.apellido_normalizado,
-                "departamentos": [
-                    {"departamento": "Caldas", "porcentaje": 40.0, "ranking": 1, "origen": "IA"},
-                    {"departamento": "Cundinamarca", "porcentaje": 36.0, "ranking": 2, "origen": "IA"},
-                    {"departamento": "Magdalena", "porcentaje": 24.0, "ranking": 3, "origen": "IA"},
-                ],
-                "frases": [
-                    {"categoria": "PERSONALIDAD", "frase": "Cada historia comienza con un nombre.", "origen": "IA"},
-                    {"categoria": "SABOR", "frase": "Descubre tu sabor único.", "origen": "IA"}
-                ]
-            }
+            return apellido_no_encontrado()
         
     def _validar_ai_response(self, ai_response: Dict):
         try:

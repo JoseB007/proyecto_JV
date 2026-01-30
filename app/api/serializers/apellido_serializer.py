@@ -9,7 +9,7 @@ class ApellidoSerializer(serializers.Serializer):
     apellido = serializers.CharField(max_length=30, required=True)
 
     def validate_apellido(self, value):
-        resultado = validar_apellido(value)
+        resultado = validar_apellido(value.upper())
 
         if not resultado["es_valido"]:
             raise serializers.ValidationError(resultado["error"])

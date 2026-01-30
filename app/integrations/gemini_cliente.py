@@ -20,23 +20,35 @@ class GeminiIACliente:
 
         try:
             response = self.cliente.models.generate_content(
-                model="gemini-3-flash-preview",
+                model="gemini-2.5-flash",
                 contents=prompt,
                 config=self.config_generacion
             )
 
-            return json.loads(response.text)
+            resultado = json.loads(response.text)
+
+            if not resultado.get('es_apellido_real'):
+                return None
+            
+            return resultado
         except Exception as e:
             print(f"Error al consultar GeminiAI: {e}")
             return None
         
     def _ai_prompt(self, apellido: str):
         return f"""
-        Genera estadísticas demográficas para el apellido '{apellido}' en Colombia.
+        Analiza el término '{apellido}'. 
+
+        TAREA DE VALIDACIÓN:
+        - Si el término es texto aleatorio (ej. 'asdfg'), una combinación sin sentido de letras, o un insulto, establece 'es_apellido_real' en false y deja los arrays de 'distribuciones' y 'frases' vacíos.
         
-        Instrucciones para las 'frases':
-        1. La primera frase debe ser de la categoría 'PERSONALIDAD'.
-        2. Las 3 frases restantes deben ser de la categoría 'SABORES'.
+        
+        TAREA DE GENERACIÓN (Solo si 'es_apellido_real' es true):
+        1. Genera estadísticas demográficas para el apellido '{apellido}' en Colombia.
+        2. Genera 4 frases obligatorias:
+            - La primera: Categoría 'PERSONALIDAD' (relacionada con el ímpetu o historia del apellido).
+            - Las otras tres: Categoría 'SABORES' (metáforas gastronómicas sobre el café, derivados y relacionados propios de la región de origen).
+        3. 'confianza' debe ser bajo si el apellido es extranjero o muy raro en Colombia.
         """
 
 # class GeminiIACliente:

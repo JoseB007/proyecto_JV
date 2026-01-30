@@ -3,14 +3,18 @@ import unicodedata
 from typing import Optional, Dict
 
 
-APELLIDO_REGEX = re.compile(r'^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]{2,30}$')
+# APELLIDO_REGEX = re.compile(r'^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]{2,30}$')
+# APELLIDO_REGEX = re.compile(r'^(?!.*(.)\1{2})[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]{3,30}$')
+APELLIDO_REGEX = re.compile(
+    r'^(?=[^aeiouáéíóúü]*[aeiouáéíóúü])'  # Al menos una vocal
+    r'(?!.*[^aeiouáéíóúü]{4})'            # Máximo 4 consonantes seguidas
+    r'(?!.*(.)\1{2})'                     # Máximo 2 letras iguales seguidas
+    r'[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]{3,30}$',     # Caracteres permitidos y longitud
+    re.IGNORECASE
+)
 
 
 def remover_acentos(apellido: str) -> str:
-    """
-    Elimina tildes y diacríticos.
-    Ej: 'GÓMEZ' -> 'GOMEZ'
-    """
     normalizado = unicodedata.normalize("NFD", apellido)
     return "".join(
         char for char in normalizado
@@ -19,10 +23,6 @@ def remover_acentos(apellido: str) -> str:
 
 
 def validar_apellido(apellido: Optional[str]) -> Dict[str, Optional[str]]:
-    """
-    Valida y normaliza un apellido según las reglas del MVP.
-    """
-
     # Campo obligatorio
     if not apellido:
         return {
@@ -44,7 +44,7 @@ def validar_apellido(apellido: Optional[str]) -> Dict[str, Optional[str]]:
         return {
             "es_valido": False,
             "error": (
-                "El apellido debe tener entre 2 y 30 letras y no contener espacios ni caracteres especiales"
+                "El apellido debe tener entre 3 y 30 letras, no contener espacios ni caracteres especiales o más de dos caracteres consecutivos repetidos"
             ),
             "normalizado": None
         }
