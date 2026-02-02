@@ -23,7 +23,19 @@ class ObtenerApellidoIA:
         
         if ai_response:
             self._validar_ai_response(ai_response)
-            # print(ai_response)
+
+            if not ai_response['es_apellido_real']:
+                return {
+                    "estado": "error",
+                    "mensaje": f"Error al digitar el apellido. {self.apellido_original} no es un apellido válido."
+                }
+            
+            if ai_response['es_apellido_extranjero']:
+                return {
+                    "estado": "error",
+                    "mensaje": f"El apellido {self.apellido_original} es de origen extranjero y no se encuentra en nuestra base de datos demográfica de Colombia."
+                }
+
             apellido_obj = self._crear_apellido(ai_response)
 
             distribuciones = DistribucionApellidoDepartamento.objects.filter(apellido=apellido_obj)

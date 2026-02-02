@@ -26,13 +26,9 @@ class GeminiIACliente:
             )
 
             resultado = json.loads(response.text)
-
-            if not resultado.get('es_apellido_real'):
-                return None
             
             return resultado
         except Exception as e:
-            print(f"Error al consultar GeminiAI: {e}")
             return None
         
     def _ai_prompt(self, apellido: str):
@@ -41,6 +37,7 @@ class GeminiIACliente:
 
         TAREA DE VALIDACIÓN:
         - Si el término es texto aleatorio (ej. 'asdfg'), una combinación sin sentido de letras, o un insulto, establece 'es_apellido_real' en false y deja los arrays de 'distribuciones' y 'frases' vacíos.
+        - Si el término es un apellido extranjero (ej. 'Smith', 'Johnson', 'Williams', 'Brown', 'Jones'), establece 'es_apellido_extranjero' en true y deja los arrays de 'distribuciones' y 'frases' vacíos.
         
         
         TAREA DE GENERACIÓN (Solo si 'es_apellido_real' es true):

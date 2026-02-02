@@ -6,6 +6,10 @@ AI_RESPONSE_SCHEMA = {
             "type": "boolean",
             "description": "Indica si el término es un apellido legítimo con trasfondo histórico. False para texto aleatorio o insultos."
         },
+        "es_apellido_extranjero": {
+            "type": "boolean",
+            "description": "Indica si el término es un apellido extranjero. True para este apellido"
+        },
         "origen": {
             "type": "string",
             "enum": ["IA"] 
@@ -47,7 +51,7 @@ AI_RESPONSE_SCHEMA = {
             },
         },
     },
-    "required": ["apellido", "es_apellido_real", "origen", "confianza", "distribuciones", "frases"],
+    "required": ["apellido", "es_apellido_real", "es_apellido_extranjero", "origen", "confianza", "distribuciones", "frases"],
 }
 
 

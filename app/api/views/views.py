@@ -20,6 +20,12 @@ class ApellidoView(APIView):
         apellido_original = serializers.validated_data['apellido']
         info_apellido = obtener_informacion_apellido(apellido_normalizado, apellido_original)
 
+        if info_apellido.get("estado") == "error":
+            return Response(
+                {"mensaje": info_apellido.get("mensaje")},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         response = ApellidoRespuestaSerializer(info_apellido)
 
         return Response(
