@@ -8,28 +8,29 @@ from app.domain.services.obtener_apellido import obtener_informacion_apellido
 
 class ApellidoView(APIView):
     def post(self, request):
-        serializers = ApellidoSerializer(data=request.data)
+        serializer = ApellidoSerializer(data=request.data)
 
-        if not serializers.is_valid():
+        if not serializer.is_valid():
             return Response(
-                serializers.errors,
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            apellido_normalizado = serializer.context["apellido_normalizado"]
+            apellido_original = serializer.validated_data['apellido']
+            info_apellido = obtener_informacion_apellido(apellido_normalizado, apellido_original)
+            
+            response = ApellidoRespuestaSerializer(info_apellido)
+            
+            return Response(
+                response.data,
+                status=status.HTTP_200_OK
+            )
+        except Exception as e:
+            return Response(
+                {"mensaje": str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        apellido_normalizado = serializers.context["apellido_normalizado"]
-        apellido_original = serializers.validated_data['apellido']
-        info_apellido = obtener_informacion_apellido(apellido_normalizado, apellido_original)
-
-        if info_apellido.get("estado") == "error":
-            return Response(
-                {"mensaje": info_apellido.get("mensaje")},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        response = ApellidoRespuestaSerializer(info_apellido)
-
-        return Response(
-            response.data,
-            status=status.HTTP_200_OK
-        )
         

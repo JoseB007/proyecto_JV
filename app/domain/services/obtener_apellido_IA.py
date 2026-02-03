@@ -11,6 +11,8 @@ from app.domain.models.models import (
 from app.integrations.ai_cliente import obtener_apellido_ai
 from app.schemas.ai_response_schema import AI_RESPONSE_SCHEMA
 from app.domain.services.apellido_no_encontrado import apellido_no_encontrado
+from app.domain.services.apellido_extranjero import apellido_extranjero
+from app.api.exceptions.apellido_exceptions import ApellidoInvalidoError
 
 
 class ObtenerApellidoIA:
@@ -25,16 +27,12 @@ class ObtenerApellidoIA:
             self._validar_ai_response(ai_response)
 
             if not ai_response['es_apellido_real']:
-                return {
-                    "estado": "error",
-                    "mensaje": f"Error al digitar el apellido. {self.apellido_original} no es un apellido válido."
-                }
+                raise ApellidoInvalidoError(
+                    f"Error al digitar el apellido. {self.apellido_original} no es un apellido válido."
+                )
             
             if ai_response['es_apellido_extranjero']:
-                return {
-                    "estado": "error",
-                    "mensaje": f"El apellido {self.apellido_original} es de origen extranjero y no se encuentra en nuestra base de datos demográfica de Colombia."
-                }
+                return apellido_extranjero()
 
             apellido_obj = self._crear_apellido(ai_response)
 

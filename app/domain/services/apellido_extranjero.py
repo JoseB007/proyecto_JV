@@ -1,7 +1,7 @@
 from typing import Dict
 
 
-def apellido_no_encontrado() -> Dict:
+def apellido_extranjero() -> Dict:
     return {
     "estado": "no_encontrado",
     "origen": "REAL",
