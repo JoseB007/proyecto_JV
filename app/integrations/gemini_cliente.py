@@ -38,6 +38,24 @@ class GeminiIACliente:
             return None
         
     def _ai_prompt_apellido(self, apellido: str):
+        REGIONES = {
+            "Huila",
+            "Nariño",
+            "Antioquia",
+            "Santander",
+            "Cauca",
+            "Valle del Cauca",
+            "Caldas",
+            "Tolima",
+            "Sierra Nevada",
+            "Boyacá",
+            "La Guajira",
+            "Risaralda",
+            "Cundinamarca",
+            "Cesar",
+            "Quindío",
+        }
+
         return f"""
         Analiza el término '{apellido}'. 
 
@@ -47,8 +65,9 @@ class GeminiIACliente:
         
         
         TAREA DE GENERACIÓN (Solo si 'es_apellido_real' es true):
-        1. Genera estadísticas demográficas para el apellido '{apellido}' en Colombia.
-        2. Genera 4 frases obligatorias:
+        1. Genera estadísticas demográficas para el apellido '{apellido}' en Colombia, teniendo en cuenta únicamente las regiones a continuación: {REGIONES}.
+        2. Dentro de las distribuciones demográficas, asegura que la suma total entre los porcentajes sea del 100%. Asigna a cada distribución el porcentaje más indicado.
+        3. Genera 4 frases obligatorias:
             - La primera: Categoría 'PERSONALIDAD' (relacionada con el ímpetu o historia del apellido).
             - Las otras tres: Categoría 'SABORES' (metáforas gastronómicas sobre el café, derivados y relacionados propios de la región de origen).
         """
