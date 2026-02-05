@@ -1,9 +1,9 @@
 import json, os
 from typing import Dict
 from openai import OpenAI
-from dotenv import load_dotenv
 
-from app.schemas.ai_response_schema import AI_RESPONSE_SCHEMA
+
+from app.schemas.ai_apellido_distro_schema import AI_APELLIDO_DISTRO_SCHEMA
 
 
 class OpenAICliente:
@@ -47,5 +47,5 @@ class OpenAICliente:
         - Devolver SOLO JSON
         - Reducir la confianza si no hay certeza
 
-        JSON structure: {AI_RESPONSE_SCHEMA}
+        JSON structure: {AI_APELLIDO_DISTRO_SCHEMA}
         """

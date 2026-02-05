@@ -1,14 +1,9 @@
 from django.db import models
 
 
-ORIGEN_DATOS = [
-    ('REAL', 'Real'),
-    ('IA', 'IA')
-]
-
 class Apellido(models.Model):
     apellido = models.CharField(max_length=30, unique=True)
-    origen = models.CharField(max_length=4, choices=ORIGEN_DATOS, default='REAL')
+    fuente = models.CharField(max_length=150)
     created_at = models.DateTimeField(auto_now_add=True)
     
     def __str__(self):
@@ -22,6 +17,7 @@ class Apellido(models.Model):
     
 class Departamento(models.Model):
     nombre = models.CharField(max_length=50, unique=True)
+    frase = models.TextField()
 
     def __str__(self):
         return self.nombre
@@ -38,7 +34,6 @@ class DistribucionApellidoDepartamento(models.Model):
     departamento = models.ForeignKey(Departamento, on_delete=models.CASCADE, related_name="apellido_distribuciones")
     porcentaje = models.DecimalField(max_digits=5, decimal_places=2)
     ranking = models.PositiveIntegerField()
-    origen = models.CharField(max_length=4, choices=ORIGEN_DATOS, default='REAL')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -54,11 +49,10 @@ class DistribucionApellidoDepartamento(models.Model):
 class Frases(models.Model):
     CATEGORIAS = [
         ('PERSONALIDAD', 'Personalidad'),
-        ('SABOR', 'Sabor')
+        ('SABORES', 'Sabores')
     ]
     categoria = models.CharField(max_length=15, choices=CATEGORIAS)
     frase = models.TextField()
-    origen = models.CharField(max_length=4, choices=ORIGEN_DATOS, default='REAL')
     apellido = models.ForeignKey(Apellido, on_delete=models.CASCADE, related_name="frases")
     created_at = models.DateTimeField(auto_now_add=True)
 
