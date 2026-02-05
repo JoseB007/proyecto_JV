@@ -1,19 +1,18 @@
-import requests, os, json
+import requests, os
 from typing import Dict, Optional, Any
 
 from django.db import transaction
 
-from app.integrations.ai_cliente import obtener_frases_ai
+from app.integrations.ai_cliente import generar_frases_ia
 from app.domain.models.models import (
     Apellido,
     Departamento,
     DistribucionApellidoDepartamento,
     Frases
 )
-from app.domain.services.apellido_no_encontrado import apellido_no_encontrado
 
 
-class ObtenerApellidoAPIOpograph:
+class ObtenerApellidoAPIOnograph:
     def __init__(self, apellido_normalizado: str, apellido_original: str):
         self.apellido_normalizado = apellido_normalizado
         self.apellido_original = apellido_original
@@ -37,7 +36,7 @@ class ObtenerApellidoAPIOpograph:
         """
         Obtiene las frases relacionadas con el apellido.
         """
-        ia_response = obtener_frases_ai(self.apellido_normalizado, distribuciones)
+        ia_response = generar_frases_ia(self.apellido_normalizado, distribuciones)
 
         if not ia_response:
             return None
@@ -50,12 +49,13 @@ class ObtenerApellidoAPIOpograph:
         with transaction.atomic():
             apellido_obj, _ = Apellido.objects.get_or_create(
                 apellido=self.apellido_normalizado,
-                defaults={'origen': 'REAL'}
+                defaults={'fuente': 'https://forebears.io'}
             )
 
             for dist in distribuciones:
                 departamento_obj, _ = Departamento.objects.get_or_create(
-                    nombre=dist['departamento']
+                    nombre=dist['departamento']['nombre'],
+                    frase=dist['departamento']['frase']
                 )
                 DistribucionApellidoDepartamento.objects.get_or_create(
                     apellido=apellido_obj,
@@ -63,16 +63,14 @@ class ObtenerApellidoAPIOpograph:
                     defaults={
                         'porcentaje': dist['porcentaje'],
                         'ranking': dist['ranking'],
-                        'origen': 'IA'
                     }
                 )
 
             for frase in frases['frases']:
                 Frases.objects.get_or_create(
-                    apellido=apellido_obj,
                     categoria=frase['categoria'],
                     frase=frase['texto'],
-                    defaults={'origen': 'IA'}
+                    apellido=apellido_obj,
                 )
 
             distribuciones_apellido = DistribucionApellidoDepartamento.objects.filter(apellido=apellido_obj)
@@ -80,10 +78,10 @@ class ObtenerApellidoAPIOpograph:
 
             return {
                 "estado": "encontrado",
-                "origen": apellido_obj.origen,
+                "fuente": apellido_obj.fuente,
                 "apellido_original": self.apellido_original,
                 "apellido_normalizado": apellido_obj.apellido,
-                "departamentos": distribuciones_apellido,
+                "distribuciones": distribuciones_apellido,
                 "frases": frases
             }
 
@@ -112,33 +110,42 @@ class ObtenerApellidoAPIOpograph:
             }
         
         REGIONES = {
-            "Huila",
-            "Nariño",
-            "Antioquia",
-            "Santander",
-            "Cauca",
-            "Valle del Cauca",
-            "Caldas",
-            "Tolima",
-            "Sierra Nevada",
-            "Boyacá",
-            "La Guajira",
-            "Risaralda",
-            "Cundinamarca",
-            "Cesar",
-            "Quindío",
+            "Huila": "Uno de los principales productores nacionales.",
+            "Nariño": "Perfiles dulces y aromáticos.",
+            "Antioquia": "Conocido por su cuerpo y balance",
+            "Santander": "Con notas herbales y aroma pronunciado.",
+            "Cauca": "Sabores complejos y equilibrados.",
+            "Valle del Cauca": "Perfiles con carácter.",
+            "Caldas": "Parte del paisaje Cultural Cafetero.",
+            "Tolima": "Suave y balanceado.",
+            "Sierra Nevada": "Intensidad y notas unicas de esta región.",
+            "Boyacá": "Por definir.",
+            "La Guajira": "Con matices cítricos y refrescantes.",
+            "Risaralda": "Equilibrio y notas frutales.",
+            "Cundinamarca": "Perfil característico de su región cafetera.",
+            "Cesar": "Café con notas dulces y balanceadas.",
+            "Quindío": "Parte del Eje Cafetero con aroma y suavidad destacada.",
         }
 
         # Construimos la lista de distribuciones si la respuesta es exitosa
-        distribuciones = [
-            {
-                "incidencia": depart.get('incidence'),
-                "ranking": depart.get('rank', 0),
-                "departamento": depart.get('jurisdiction', 'Desconocido').split(" Department")[0].strip()
-            }
-            for depart in response.get('jurisdictions', []) if depart['jurisdiction'].split(" Department")[0] in REGIONES
-        ][:3]
+        distribuciones = []
 
+        for depart in response.get('jurisdictions', []):
+            nombre_depart_api = depart.get('jurisdiction').split(" Department")[0].strip()
+
+            if nombre_depart_api in REGIONES:
+                distribuciones.append({
+                    "incidencia": depart.get('incidence'),
+                    "ranking": depart.get('rank', 0),
+                    "departamento": {
+                        "nombre": nombre_depart_api,
+                        "frase": REGIONES[nombre_depart_api]
+                    },
+                })
+                
+
+            if len(distribuciones) == 3:
+                break
         total_incidencia = sum(d['incidencia'] for d in distribuciones)
 
         if total_incidencia > 0:

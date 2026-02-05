@@ -8,8 +8,8 @@ from app.domain.models.models import (
     Frases
 )
 
-from app.integrations.ai_cliente import obtener_apellido_ai
-from app.schemas.ai_response_schema import AI_RESPONSE_SCHEMA
+from app.integrations.ai_cliente import generar_apellido_ia
+from app.schemas.ai_apellido_distro_schema import AI_APELLIDO_DISTRO_SCHEMA
 from app.domain.services.apellido_no_encontrado import apellido_no_encontrado
 from app.domain.services.apellido_extranjero import apellido_extranjero
 from app.api.exceptions.apellido_exceptions import ApellidoInvalidoError
@@ -21,7 +21,7 @@ class ObtenerApellidoIA:
         self.apellido_original = apellido_original
 
     def ejecutar(self) -> Dict:
-        ai_response = obtener_apellido_ai(self.apellido_normalizado)
+        ai_response = generar_apellido_ia(self.apellido_normalizado)
         
         if ai_response:
             self._validar_ai_response(ai_response)
@@ -41,10 +41,10 @@ class ObtenerApellidoIA:
 
             return {
                 "estado": "encontrado",
-                "origen": "IA",
+                "fuente": apellido_obj.fuente,
                 "apellido_original": self.apellido_original,
                 "apellido_normalizado": apellido_obj.apellido,
-                "departamentos": distribuciones,
+                "distribuciones": distribuciones,
                 "frases": frases
             }
         else:
@@ -52,14 +52,14 @@ class ObtenerApellidoIA:
         
     def _validar_ai_response(self, ai_response: Dict):
         try:
-            validate(instance=ai_response, schema=AI_RESPONSE_SCHEMA)
+            validate(instance=ai_response, schema=AI_APELLIDO_DISTRO_SCHEMA)
         except ValidationError as e:
             raise ValueError(f"Error al validar la respuesta del AI: {e}")
 
     def _crear_apellido(self, ai_response: Dict) -> Apellido:
         apellido_obj, _ = Apellido.objects.get_or_create(
             apellido=ai_response['apellido'],
-            defaults={'origen': ai_response['origen']}
+            defaults={'fuente': 'IA Gemini'}
         )
 
         for dist in ai_response['distribuciones']:
@@ -72,16 +72,14 @@ class ObtenerApellidoIA:
                 defaults={
                     'porcentaje': dist['porcentaje'],
                     'ranking': dist['ranking'],
-                    'origen': 'IA'
                 }
             )
 
         for frase in ai_response['frases']:
             Frases.objects.get_or_create(
-                apellido=apellido_obj,
                 categoria=frase['categoria'],
                 frase=frase['texto'],
-                defaults={'origen': 'IA'}
+                apellido=apellido_obj,
             )
 
         return apellido_obj
