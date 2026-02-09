@@ -1,36 +1,36 @@
 from typing import Dict
 
-from .constructor_mensaje import ConstructorMensajeCompartido
-from .email_sender import EmailSender, ResultadoCompartido, EstadoCompartido
+from .generar_mensaje import GeneradorMensaje
+from .email_sender import EnviadorCorreo, ResultadoEnvio, EstadoEnvio
 from ..domain.models.models import DistribucionApellidoDepartamento, Apellido
 
 
-class Compartir:
+class ServicioCompartir:
     def __init__(self, apellido: str, canal: str, destinatario: str):
         self.apellido = apellido
         self.canal = canal
         self.destinatario = destinatario
 
-    def obtener_obj_apellido(self):
+    def _obtener_apellido(self):
         try:
             apellido = Apellido.objects.get(apellido=self.apellido)
             return apellido
         except Apellido.DoesNotExist:
             raise ValueError("Apellido no encontrado")
         
-    def obtener_distribuciones(self):
-        distribuciones = DistribucionApellidoDepartamento.objects.filter(apellido=self.obtener_obj_apellido())
+    def _obtener_distribuciones(self):
+        distribuciones = DistribucionApellidoDepartamento.objects.filter(apellido=self._obtener_apellido())
         return distribuciones
 
-    def compartir(self, distribuciones: Dict):
+    def _enviar_por_canal(self, distribuciones: Dict):
         try:
-            apellido_obj = self.obtener_obj_apellido()
-            constructor_mensaje = ConstructorMensajeCompartido()
-            mensaje = constructor_mensaje.construir(apellido_obj, distribuciones)
+            apellido_obj = self._obtener_apellido()
+            generador_mensaje = GeneradorMensaje()
+            mensaje = generador_mensaje.generar(apellido_obj, distribuciones)
 
             if self.canal == "email":
-                email_sender = EmailSender()
-                return email_sender.send(
+                enviador = EnviadorCorreo()
+                return enviador.enviar(
                     asunto=mensaje.asunto, 
                     cuerpo=mensaje.cuerpo, 
                     destinatario=self.destinatario
@@ -38,16 +38,20 @@ class Compartir:
             # elif self.canal == "whatsapp":
             #     whatsapp_sender = WhatsAppSender()
             #     whatsapp_sender.send(mensaje.cuerpo)
-            return ResultadoCompartido(
-                estado=EstadoCompartido.FALLIDO,
-                canal="email",
+            return ResultadoEnvio(
+                estado=EstadoEnvio.FALLIDO,
+                canal=self.canal,
                 mensaje="Canal no soportado."
             )
         except Exception as e:
-            print(f"Error al compartir: {str(e)}")
+            return ResultadoEnvio(
+                estado=EstadoEnvio.FALLIDO,
+                canal=self.canal,
+                mensaje=f"Error al compartir: {str(e)}"
+            )
 
     def ejecutar(self):
-        distribuciones = self.obtener_distribuciones()
-        self.compartir(distribuciones)
+        distribuciones = self._obtener_distribuciones()
+        return self._enviar_por_canal(distribuciones)
             
         

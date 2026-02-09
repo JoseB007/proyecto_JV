@@ -4,20 +4,20 @@ from enum import Enum
 from dataclasses import dataclass
 
 
-class EstadoCompartido(Enum):
+class EstadoEnvio(Enum):
     ACEPTADO = "ACEPTADO"
     FALLIDO = "FALLIDO"
 
 
 @dataclass
-class ResultadoCompartido:
-    estado: EstadoCompartido
+class ResultadoEnvio:
+    estado: EstadoEnvio
     canal: str
     mensaje: str
 
 
-class EmailSender:
-    def send(self, asunto: str, cuerpo: str, destinatario: str):
+class EnviadorCorreo:
+    def enviar(self, asunto: str, cuerpo: str, destinatario: str):
         try:
             email = EmailMultiAlternatives(
                 subject=asunto,
@@ -27,14 +27,14 @@ class EmailSender:
             )
             email.send()
 
-            return ResultadoCompartido(
-                estado=EstadoCompartido.ACEPTADO,
+            return ResultadoEnvio(
+                estado=EstadoEnvio.ACEPTADO,
                 canal="email",
                 mensaje="Correo enviado correctamente."
             )
         except Exception as e:
-            return ResultadoCompartido(
-                estado=EstadoCompartido.FALLIDO,
+            return ResultadoEnvio(
+                estado=EstadoEnvio.FALLIDO,
                 canal="email",
-                mensaje=f"Error al enviar el correo. {e}"
+                mensaje=f"Error de servidor al enviar el correo. {e}"
             )

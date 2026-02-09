@@ -3,7 +3,9 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from app.api.serializers.apellido_serializer import ApellidoEntradaSerializer, DistribucionApellidoRespuestaSerializer
+from app.api.serializers.compartir_serializer import SolicitudCompartirSerializer, RespuestaCompartirSerializer
 from app.domain.services.obtener_apellido import obtener_informacion_apellido
+from app.shared.compartir_service import ServicioCompartir
 
 
 class ApellidoView(APIView):
@@ -33,4 +35,31 @@ class ApellidoView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
+
+class CompartirView(APIView):
+    def post(self, request):
+        serializer = SolicitudCompartirSerializer(data=request.data)
+
+        if not serializer.is_valid():
+            return Response(
+                serializer.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
         
+        try:
+            apellido_normalizado = serializer.context["apellido_normalizado"]
+            canal = serializer.validated_data['canal']
+            destinatario = serializer.validated_data['destinatario']
+
+            servicio = ServicioCompartir(apellido_normalizado, canal, destinatario)
+            response = RespuestaCompartirSerializer(servicio.ejecutar())
+
+            return Response(
+                {"mensaje": response.data},
+                status=status.HTTP_200_OK
+            )
+        except Exception as e:
+            return Response(
+                {"mensaje": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )

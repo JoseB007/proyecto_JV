@@ -3,23 +3,24 @@ from dataclasses import dataclass
 
 from ..domain.models.models import Frases
 
+
 @dataclass
-class MensajeCompartido:
+class Mensaje:
     asunto: str
     cuerpo: str
 
 
-class ConstructorMensajeCompartido:
+class GeneradorMensaje:
     """
-    Constructor de mensaje compartido que crea un mensaje con el asunto y el cuerpo.
+    Generador de mensaje compartido que crea un mensaje con el asunto y el cuerpo.
     """
-    def construir(self, apellido, distribuciones: Dict) -> MensajeCompartido:
-        return MensajeCompartido(
+    def generar(self, apellido, distribuciones: Dict) -> Mensaje:
+        return Mensaje(
             asunto=f"Resultado de búsqueda para el apellido {apellido}",
-            cuerpo=self.construir_cuerpo(distribuciones, apellido)
+            cuerpo=self.generar_cuerpo(distribuciones, apellido)
         )
 
-    def construir_cuerpo(self, distribuciones: Dict, apellido) -> str:
+    def generar_cuerpo(self, distribuciones: Dict, apellido) -> str:
         lineas = []
 
         if distribuciones:
