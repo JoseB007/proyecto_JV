@@ -6,6 +6,7 @@ from app.api.serializers.apellido_serializer import ApellidoEntradaSerializer, D
 from app.api.serializers.compartir_serializer import SolicitudCompartirSerializer, RespuestaCompartirSerializer
 from app.domain.services.obtener_apellido import obtener_informacion_apellido
 from app.shared.compartir_service import ServicioCompartir
+from app.shared.email_sender import EstadoEnvio
 
 
 class ApellidoView(APIView):
@@ -52,11 +53,14 @@ class CompartirView(APIView):
             destinatario = serializer.validated_data['destinatario']
 
             servicio = ServicioCompartir(apellido_normalizado, canal, destinatario)
-            response = RespuestaCompartirSerializer(servicio.ejecutar())
+            resultado = servicio.ejecutar()
+            
+            http_status = status.HTTP_200_OK if resultado.estado == EstadoEnvio.ACEPTADO else status.HTTP_400_BAD_REQUEST
+            response = RespuestaCompartirSerializer(resultado)
 
             return Response(
                 {"mensaje": response.data},
-                status=status.HTTP_200_OK
+                status=http_status
             )
         except Exception as e:
             return Response(
