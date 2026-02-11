@@ -36,7 +36,7 @@ class ObtenerApellidoAPIOnograph:
         """
         Obtiene las frases relacionadas con el apellido.
         """
-        ia_response = generar_frases_ia(self.apellido_normalizado, distribuciones)
+        ia_response = generar_frases_ia(self.apellido_original, distribuciones)
 
         if not ia_response:
             return None

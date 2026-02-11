@@ -20,11 +20,19 @@ class ApellidoView(APIView):
             )
         
         try:
-            apellido_normalizado = serializer.context["apellido_normalizado"]
-            apellido_original = serializer.validated_data['apellido']
-            info_apellido = obtener_informacion_apellido(apellido_normalizado, apellido_original)
+            lista_apellidos = serializer.context["lista_apellidos"]
+            lista_originales = serializer.context["lista_originales"]
             
-            response = DistribucionApellidoRespuestaSerializer(info_apellido)
+            resultados = []
+            for norm, orig in zip(lista_apellidos, lista_originales):
+                info = obtener_informacion_apellido(norm, orig)
+                resultados.append(info)
+            
+            from app.domain.services.unificar_apellidos import UnificarApellidosService
+            unificador = UnificarApellidosService()
+            resultado_unificado = unificador.ejecutar(resultados)
+            
+            response = DistribucionApellidoRespuestaSerializer(resultado_unificado)
             
             return Response(
                 response.data,

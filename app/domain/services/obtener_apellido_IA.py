@@ -22,7 +22,7 @@ class ObtenerApellidoIA:
         self.apellido_original = apellido_original
 
     def ejecutar(self) -> Dict:
-        ai_response = generar_apellido_ia(self.apellido_normalizado)
+        ai_response = generar_apellido_ia(self.apellido_original)
         
         if ai_response:
             self._validar_ai_response(ai_response)
