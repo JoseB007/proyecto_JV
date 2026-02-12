@@ -14,6 +14,7 @@ from app.schemas.ai_apellido_distro_schema import AI_APELLIDO_DISTRO_SCHEMA
 from app.domain.services.apellido_no_encontrado import apellido_no_encontrado
 from app.domain.services.apellido_extranjero import apellido_extranjero
 from app.api.exceptions.apellido_exceptions import ApellidoInvalidoError
+from app.utils.constantes import REGIONES
 
 
 class ObtenerApellidoIA:
@@ -58,24 +59,6 @@ class ObtenerApellidoIA:
             raise ValueError(f"Error al validar la respuesta del AI: {e}")
 
     def _crear_apellido(self, ai_response: Dict) -> Apellido:
-        REGIONES = {
-            "Huila": "Uno de los principales productores nacionales.",
-            "Nariño": "Perfiles dulces y aromáticos.",
-            "Antioquia": "Conocido por su cuerpo y balance",
-            "Santander": "Con notas herbales y aroma pronunciado.",
-            "Cauca": "Sabores complejos y equilibrados.",
-            "Valle del Cauca": "Perfiles con carácter.",
-            "Caldas": "Parte del paisaje Cultural Cafetero.",
-            "Tolima": "Suave y balanceado.",
-            "Sierra Nevada": "Intensidad y notas unicas de esta región.",
-            "Boyacá": "Por definir.",
-            "La Guajira": "Con matices cítricos y refrescantes.",
-            "Risaralda": "Equilibrio y notas frutales.",
-            "Cundinamarca": "Perfil característico de su región cafetera.",
-            "Cesar": "Café con notas dulces y balanceadas.",
-            "Quindío": "Parte del Eje Cafetero con aroma y suavidad destacada.",
-        }
-
         with transaction.atomic():
             apellido_obj, _ = Apellido.objects.get_or_create(
                 apellido=ai_response['apellido'],

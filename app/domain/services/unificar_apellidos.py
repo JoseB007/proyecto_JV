@@ -1,6 +1,9 @@
 from typing import List, Dict
 import statistics
 
+from app.utils.math import ajustar_porcentaje
+
+
 class UnificarApellidosService:
     def ejecutar(self, resultados_lista: List[Dict]) -> Dict:
         if not resultados_lista:
@@ -66,8 +69,10 @@ class UnificarApellidosService:
             total_porcentaje = sum(d["porcentaje"] for d in distribuciones_finales)
             if total_porcentaje > 0:
                 for d in distribuciones_finales:
-                    d["porcentaje"] = round((d["porcentaje"] / total_porcentaje) * 100, 2)
-                
+                    d["porcentaje"] = round((d["porcentaje"] / total_porcentaje) * 100)
+
+        # Ajustar porcentajes para que sumen 100%
+        distribuciones_finales = ajustar_porcentaje(distribuciones_finales)
 
         # Combinar frases (sin duplicados exactos)
         frases_finales = self.unificar_frases(apellidos_originales, resultados_lista)

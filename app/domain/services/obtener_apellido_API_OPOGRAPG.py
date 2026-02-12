@@ -10,6 +10,8 @@ from app.domain.models.models import (
     DistribucionApellidoDepartamento,
     Frases
 )
+from app.utils.math import ajustar_porcentaje
+from app.utils.constantes import REGIONES
 
 
 class ObtenerApellidoAPIOnograph:
@@ -109,24 +111,6 @@ class ObtenerApellidoAPIOnograph:
                 "mensaje": "No se pudo obtener datos de la API"
             }
         
-        REGIONES = {
-            "Huila": "Uno de los principales productores nacionales.",
-            "Nariño": "Perfiles dulces y aromáticos.",
-            "Antioquia": "Conocido por su cuerpo y balance",
-            "Santander": "Con notas herbales y aroma pronunciado.",
-            "Cauca": "Sabores complejos y equilibrados.",
-            "Valle del Cauca": "Perfiles con carácter.",
-            "Caldas": "Parte del paisaje Cultural Cafetero.",
-            "Tolima": "Suave y balanceado.",
-            "Sierra Nevada": "Intensidad y notas unicas de esta región.",
-            "Boyacá": "Por definir.",
-            "La Guajira": "Con matices cítricos y refrescantes.",
-            "Risaralda": "Equilibrio y notas frutales.",
-            "Cundinamarca": "Perfil característico de su región cafetera.",
-            "Cesar": "Café con notas dulces y balanceadas.",
-            "Quindío": "Parte del Eje Cafetero con aroma y suavidad destacada.",
-        }
-
         # Construimos la lista de distribuciones si la respuesta es exitosa
         distribuciones = []
 
@@ -150,9 +134,12 @@ class ObtenerApellidoAPIOnograph:
 
         if total_incidencia > 0:
             for d in distribuciones:
-                d['porcentaje'] = (d['incidencia'] * 100) / total_incidencia
+                d['porcentaje'] = round((d['incidencia'] * 100) / total_incidencia)
         else:
             for d in distribuciones:
                 d['porcentaje'] = 0
+        
+        # Ajustar porcentajes para que sumen 100%
+        distribuciones = ajustar_porcentaje(distribuciones)
         
         return self.generar_apellido_distribuciones(distribuciones)

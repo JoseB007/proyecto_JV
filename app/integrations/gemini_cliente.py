@@ -3,6 +3,8 @@ import json
 from typing import Dict
 from google import genai
 
+from app.utils.constantes import REGIONES
+
 
 class GeminiIACliente:
     def __init__(self, schema: Dict):
@@ -38,24 +40,6 @@ class GeminiIACliente:
             return None
         
     def _ai_prompt_apellido(self, apellido: str):
-        REGIONES = {
-            "Huila",
-            "Nariño",
-            "Antioquia",
-            "Santander",
-            "Cauca",
-            "Valle del Cauca",
-            "Caldas",
-            "Tolima",
-            "Sierra Nevada",
-            "Boyacá",
-            "La Guajira",
-            "Risaralda",
-            "Cundinamarca",
-            "Cesar",
-            "Quindío",
-        }
-
         return f"""
         Analiza el término '{apellido}'. 
 
@@ -66,7 +50,7 @@ class GeminiIACliente:
         
         TAREA DE GENERACIÓN (Solo si 'es_apellido_real' es true):
         1. Genera estadísticas demográficas para el apellido '{apellido}' en Colombia, teniendo en cuenta únicamente las regiones a continuación: {REGIONES}.
-        2. Dentro de las distribuciones demográficas, asegura que la suma total entre los porcentajes sea del 100%. Asigna a cada distribución el porcentaje más indicado, por ej. 50.3%
+        2. Dentro de las distribuciones demográficas, asegura que la suma total entre los porcentajes sea del 100%. Asigna a cada distribución el porcentaje más indicado, por ej. 50, 25, 25%
         3. Intenta generar el ranking de cada distribución de forma aleatoria entre 1 y 100, y no que las distribuciones sean, por ej. ranking 1, 2 y 3.
         3. Genera 4 frases obligatorias:
             - La primera: Categoría 'PERSONALIDAD' (relacionada con el ímpetu o historia del apellido).
