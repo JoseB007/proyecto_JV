@@ -70,22 +70,7 @@ class UnificarApellidosService:
                 
 
         # Combinar frases (sin duplicados exactos)
-        frases_finales = []
-        vistas_frases = set()
-        for res in resultados_lista:
-            frases = res.get("frases", [])
-            for f in frases:
-                if hasattr(f, 'categoria'):
-                    cat = f.categoria
-                    txt = f.frase
-                else:
-                    cat = f["categoria"]
-                    txt = f["frase"]
-                
-                identificador = f"{cat}:{txt}"
-                if identificador not in vistas_frases:
-                    frases_finales.append({"categoria": cat, "frase": txt})
-                    vistas_frases.add(identificador)
+        frases_finales = self.unificar_frases(apellidos_originales, resultados_lista)
 
         return {
             "estado": resultados_lista[0]["estado"],
@@ -95,3 +80,29 @@ class UnificarApellidosService:
             "distribuciones": distribuciones_finales,
             "frases": frases_finales
         }
+
+    def unificar_frases(self, apellido_unificado: str, resultados_lista: List[Dict]) -> List[Dict]:
+        frases_finales = []
+        vistas_frases = set()
+        
+        for res in resultados_lista:
+            apellido_individual = res.get("apellido_original", "")
+            frases = res.get("frases", [])
+            for f in frases:
+                if hasattr(f, 'categoria'):
+                    cat = f.categoria
+                    txt = f.frase
+                else:
+                    cat = f["categoria"]
+                    txt = f["frase"]
+                
+                # Reemplazar el apellido individual por el unificado
+                if apellido_individual and apellido_unificado:
+                    txt = txt.replace(apellido_individual, apellido_unificado)
+                
+                identificador = f"{cat}:{txt}"
+                if identificador not in vistas_frases:
+                    frases_finales.append({"categoria": cat, "frase": txt})
+                    vistas_frases.add(identificador)
+        
+        return frases_finales[:4]
