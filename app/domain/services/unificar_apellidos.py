@@ -101,8 +101,9 @@ class UnificarApellidosService:
                     txt = txt.replace(apellido_individual, apellido_unificado)
                 
                 identificador = f"{cat}:{txt}"
-                if identificador not in vistas_frases:
-                    frases_finales.append({"categoria": cat, "frase": txt})
-                    vistas_frases.add(identificador)
+                if apellido_unificado in identificador:
+                    if identificador not in vistas_frases:
+                        frases_finales.append({"categoria": cat, "frase": txt})
+                        vistas_frases.add(identificador)
         
         return frases_finales[:4]
