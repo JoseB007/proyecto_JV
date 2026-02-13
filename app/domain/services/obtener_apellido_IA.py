@@ -25,32 +25,29 @@ class ObtenerApellidoIA:
     def ejecutar(self) -> Dict:
         ai_response = generar_apellido_ia(self.apellido_original)
         
-        if ai_response:
-            self._validar_ai_response(ai_response)
+        self._validar_ai_response(ai_response)
 
-            if not ai_response['es_apellido_real']:
-                raise ApellidoInvalidoError(
-                    f"Error al digitar el apellido. {self.apellido_original} no es un apellido válido."
-                )
-            
-            if ai_response['es_apellido_extranjero']:
-                return apellido_extranjero()
+        if not ai_response['es_apellido_real']:
+            raise ApellidoInvalidoError(
+                f"Error al digitar el apellido. {self.apellido_original} no es un apellido válido."
+            )
+        
+        if ai_response['es_apellido_extranjero']:
+            return apellido_extranjero()
 
-            apellido_obj = self._crear_apellido(ai_response)
+        apellido_obj = self._crear_apellido(ai_response)
 
-            distribuciones = DistribucionApellidoDepartamento.objects.filter(apellido=apellido_obj)
-            frases = Frases.objects.filter(apellido=apellido_obj)
+        distribuciones = DistribucionApellidoDepartamento.objects.filter(apellido=apellido_obj)
+        frases = Frases.objects.filter(apellido=apellido_obj)
 
-            return {
-                "estado": "encontrado",
-                "fuente": apellido_obj.fuente,
-                "apellido_original": self.apellido_original,
-                "apellido_normalizado": apellido_obj.apellido,
-                "distribuciones": distribuciones,
-                "frases": frases
-            }
-        else:
-            return apellido_no_encontrado()
+        return {
+            "estado": "encontrado",
+            "fuente": apellido_obj.fuente,
+            "apellido_original": self.apellido_original,
+            "apellido_normalizado": apellido_obj.apellido,
+            "distribuciones": distribuciones,
+            "frases": frases
+        }
         
     def _validar_ai_response(self, ai_response: Dict):
         try:

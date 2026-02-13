@@ -4,6 +4,7 @@ from typing import Dict
 from google import genai
 
 from app.utils.constantes import REGIONES
+from app.api.exceptions.apellido_exceptions import IntegracionIAError
 
 
 class GeminiIACliente:
@@ -37,7 +38,7 @@ class GeminiIACliente:
             
             return resultado
         except Exception as e:
-            return None
+            raise IntegracionIAError(f"Fallo al generar contenido con IA: {str(e)}")
         
     def _ai_prompt_apellido(self, apellido: str):
         return f"""

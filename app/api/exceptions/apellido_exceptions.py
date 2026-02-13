@@ -11,3 +11,21 @@ class ApellidoInvalidoError(APIException):
         self.detail = {"mensaje": mensaje}
         if status_code:
             self.status_code = status_code
+
+
+class IntegracionIAError(APIException):
+    status_code = status.HTTP_502_BAD_GATEWAY
+    default_detail = 'Error en la integración con el servicio de IA.'
+    default_code = 'error_ia'
+
+    def __init__(self, mensaje):
+        self.detail = {"mensaje": mensaje}
+
+
+class ExternalAPIError(APIException):
+    status_code = status.HTTP_502_BAD_GATEWAY
+    default_detail = 'Error en la comunicación con la API externa.'
+    default_code = 'error_api_externa'
+
+    def __init__(self, mensaje):
+        self.detail = {"mensaje": mensaje}

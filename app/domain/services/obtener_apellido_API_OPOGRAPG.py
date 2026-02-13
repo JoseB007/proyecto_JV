@@ -12,6 +12,7 @@ from app.domain.models.models import (
 )
 from app.utils.math import ajustar_porcentaje
 from app.utils.constantes import REGIONES
+from app.api.exceptions.apellido_exceptions import ExternalAPIError
 
 
 class ObtenerApellidoAPIOnograph:
@@ -19,7 +20,7 @@ class ObtenerApellidoAPIOnograph:
         self.apellido_normalizado = apellido_normalizado
         self.apellido_original = apellido_original
 
-    def peticion_api(self, url: str, params: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    def peticion_api(self, url: str, params: Dict[str, Any]) -> Dict[str, Any]:
         """
         Realiza la petición a la API de Onograph. Retorna la respuesta en formato JSON.
         """
@@ -29,21 +30,16 @@ class ObtenerApellidoAPIOnograph:
             response.raise_for_status()
             
             return response.json()
+        except requests.exceptions.HTTPError as e:
+            raise ExternalAPIError(f"Error de la API externa (HTTP {e.response.status_code})")
         except Exception as e:
-            print(f"Error inesperado: {e}")
-        
-        return None
+            raise ExternalAPIError(f"Error inesperado al conectar con la API: {str(e)}")
 
-    def obtener_frases_ia(self, distribuciones: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    def obtener_frases_ia(self, distribuciones: Dict[str, Any]) -> Dict[str, Any]:
         """
         Obtiene las frases relacionadas con el apellido.
         """
-        ia_response = generar_frases_ia(self.apellido_original, distribuciones)
-
-        if not ia_response:
-            return None
-
-        return ia_response
+        return generar_frases_ia(self.apellido_original, distribuciones)
     
     def generar_apellido_distribuciones(self, distribuciones: Dict[str, Any]) -> Dict[str, Any]:
         frases = self.obtener_frases_ia(distribuciones)
@@ -104,8 +100,8 @@ class ObtenerApellidoAPIOnograph:
 
         response = self.peticion_api(URL, PARAMETROS)
 
-        # Validamos que la respuesta sea exitosa y contenga datos
-        if not response or 'jurisdictions' not in response:
+        # Validamos que la respuesta contenga datos
+        if 'jurisdictions' not in response:
             return {
                 "estado": "error",
                 "mensaje": "No se pudo obtener datos de la API"
