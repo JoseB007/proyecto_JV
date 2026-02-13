@@ -1,4 +1,5 @@
 from typing import Dict, List, Any
+from app.utils.constantes import GRAMAJE_TOTAL_CAFE
 
 
 def ajustar_porcentaje(distribuciones: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
@@ -11,3 +12,10 @@ def ajustar_porcentaje(distribuciones: List[Dict[str, Any]]) -> List[Dict[str, A
                 d['porcentaje'] += diferencia
                 break
     return distribuciones
+
+
+def calcular_gramaje(porcentaje: float) -> float:
+    """
+    Calcula los gramos de café basados en el porcentaje y el total base (250g).
+    """
+    return round((porcentaje * GRAMAJE_TOTAL_CAFE) / 100, 2)

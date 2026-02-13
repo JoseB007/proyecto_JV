@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from app.validators.apellido import validar_apellido
+from app.utils.math import calcular_gramaje
 
 
 class ApellidoEntradaSerializer(serializers.Serializer):
@@ -26,6 +27,11 @@ class DistribucionSerializer(serializers.Serializer):
     departamento = DepartamentoSerializer()
     porcentaje = serializers.FloatField()
     ranking = serializers.IntegerField()
+    gramaje = serializers.SerializerMethodField()
+
+    def get_gramaje(self, obj) -> float:
+        porcentaje = obj.porcentaje if hasattr(obj, 'porcentaje') else obj.get('porcentaje', 0)
+        return calcular_gramaje(porcentaje)
 
 
 class FraseSerializer(serializers.Serializer):

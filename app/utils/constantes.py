@@ -15,3 +15,5 @@ REGIONES = {
     "Cesar": "Café con notas dulces y balanceadas.",
     "Quindío": "Parte del Eje Cafetero con aroma y suavidad destacada.",
 }
+
+GRAMAJE_TOTAL_CAFE = 250
