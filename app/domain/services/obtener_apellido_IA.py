@@ -57,10 +57,14 @@ class ObtenerApellidoIA:
 
     def _crear_apellido(self, ai_response: Dict) -> Apellido:
         with transaction.atomic():
-            apellido_obj, _ = Apellido.objects.get_or_create(
+            apellido_obj, created = Apellido.objects.get_or_create(
                 apellido=ai_response['apellido'],
-                defaults={'fuente': 'IA Gemini'}
+                defaults={'estado': Apellido.PENDIENTE, 'fuente': 'IA Gemini'}
             )
+
+            if not created:
+                apellido_obj.fuente = 'IA Gemini'
+                apellido_obj.es_inferido = True
 
             for dist in ai_response['distribuciones']:
                 departamento, _ = Departamento.objects.get_or_create(
@@ -83,5 +87,14 @@ class ObtenerApellidoIA:
                     apellido=apellido_obj,
                 )
 
+            apellido_obj.estado = Apellido.LISTO
+            apellido_obj.save()
+
             return apellido_obj
+
+    def _marcar_como_fallido(self):
+        apellido_obj = Apellido.objects.filter(apellido=self.apellido_normalizado).first()
+        if apellido_obj:
+            apellido_obj.estado = Apellido.FALLIDO
+            apellido_obj.save()
         

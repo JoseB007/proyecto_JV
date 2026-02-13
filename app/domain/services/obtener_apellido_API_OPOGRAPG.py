@@ -45,10 +45,13 @@ class ObtenerApellidoAPIOnograph:
         frases = self.obtener_frases_ia(distribuciones)
 
         with transaction.atomic():
-            apellido_obj, _ = Apellido.objects.get_or_create(
+            apellido_obj, created = Apellido.objects.get_or_create(
                 apellido=self.apellido_normalizado,
-                defaults={'fuente': 'https://forebears.io'}
+                defaults={'estado': Apellido.PENDIENTE, 'fuente': 'https://forebears.io'}
             )
+
+            if not created:
+                apellido_obj.fuente = 'https://forebears.io'
 
             for dist in distribuciones:
                 departamento_obj, _ = Departamento.objects.get_or_create(
@@ -71,8 +74,11 @@ class ObtenerApellidoAPIOnograph:
                     apellido=apellido_obj,
                 )
 
+            apellido_obj.estado = Apellido.LISTO
+            apellido_obj.save()
+
             distribuciones_apellido = DistribucionApellidoDepartamento.objects.filter(apellido=apellido_obj)
-            frases = Frases.objects.filter(apellido=apellido_obj)
+            frases_obj = Frases.objects.filter(apellido=apellido_obj)
 
             return {
                 "estado": "encontrado",
@@ -80,7 +86,7 @@ class ObtenerApellidoAPIOnograph:
                 "apellido_original": self.apellido_original,
                 "apellido_normalizado": apellido_obj.apellido,
                 "distribuciones": distribuciones_apellido,
-                "frases": frases
+                "frases": frases_obj
             }
 
     def ejecutar(self) -> Optional[Dict[str, Any]]:
